@@ -20,7 +20,7 @@ import processing.core.PApplet;
 public class DEV018x3A extends PApplet {
 
     public static ArrayList<Point> points = new ArrayList<>();
-
+    
     //Read text file and place columns in Arraylists
     public static void ReadText() {
         try {
@@ -52,6 +52,80 @@ public class DEV018x3A extends PApplet {
             e.printStackTrace();
         }
     }
+    
+    /*-------------------------------------------------------------*/
+    
+    //Find maximum in X
+    public static int getMaxX(ArrayList<Point> numbers) {
+        int maxValue = numbers.get(0).getX().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getX() > maxValue) {
+                maxValue = numbers.get(i).getX().intValue();
+            }
+        }
+        return maxValue;
+    }
+
+    //Find minimum in X
+    public static int getMinX(ArrayList<Point> numbers) {
+        int minValue = numbers.get(0).getX().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getX() < minValue) {
+                minValue = numbers.get(i).getX().intValue();
+            }
+        }
+        return minValue;
+    }
+    
+    /*-------------------------------------------------------------*/
+
+    //Find maximum in Y
+    public static int getMaxY(ArrayList<Point> numbers) {
+        int maxValue = numbers.get(0).getY().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getY() > maxValue) {
+                maxValue = numbers.get(i).getY().intValue();
+            }
+        }
+        return maxValue;
+    }
+
+    //Find minimum in Y
+    public static int getMinY(ArrayList<Point> numbers) {
+        int minValue = numbers.get(0).getY().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getY() < minValue) {
+                minValue = numbers.get(i).getY().intValue();
+            }
+        }
+        return minValue;
+    }
+    
+    /*-------------------------------------------------------------*/
+    
+    //Find maximum in Z
+    public static int getMaxZ(ArrayList<Point> numbers) {
+        int maxValue = numbers.get(0).getZ().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getZ() > maxValue) {
+                maxValue = numbers.get(i).getZ().intValue();
+            }
+        }
+        return maxValue;
+    }
+
+    //Find minimum in Z
+    public static int getMinZ(ArrayList<Point> numbers) {
+        int minValue = numbers.get(0).getZ().intValue();
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).getZ() < minValue) {
+                minValue = numbers.get(i).getZ().intValue();
+            }
+        }
+        return minValue;
+    }
+    
+    /*-------------------------------------------------------------*/
 
     /**
      * @param args the command line arguments

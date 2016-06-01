@@ -6,18 +6,11 @@
 package dev01.pkg8x3a;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
-import de.fhpotsdam.unfolding.geo.Location;
-import de.fhpotsdam.unfolding.mapdisplay.Java2DMapDisplay;
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
-import de.fhpotsdam.unfolding.providers.Google;
-import de.fhpotsdam.unfolding.utils.MapUtils;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import processing.core.PApplet;
-import dev01.pkg8x3a.RDtoGPS;
-import processing.event.MouseEvent;
+import processing.core.PVector;
 
 /**
  *
@@ -25,16 +18,17 @@ import processing.event.MouseEvent;
  */
 public class DEV018x3A extends PApplet {
 
-    public static ArrayList<Point> points = new ArrayList<>();
-    public static ArrayList<Point> xy = new ArrayList<>();
-    UnfoldingMap currentMap;
+    public static ArrayList<PVector> points = new ArrayList<>();
+    static float minX;
+    static float maxX;
+    static float minY;
+    static float maxY;
 
     //Read text file and place columns in Arraylists
     public static void ReadText() {
         try {
             //Read text file
-            String encoding = "UTF-8";
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\dev\\oost.csv"), encoding));
+            BufferedReader br = new BufferedReader(new FileReader("C:\\dev\\oost.csv"));
 
             System.out.println("Reading CSV file....");
             br.readLine(); // This will read the first line
@@ -43,22 +37,12 @@ public class DEV018x3A extends PApplet {
             //Clear Arraylists for correct order
             points.clear();
 
-            Point point = new Point();
-
             System.out.println("Splitting items in CSV....");
             while ((line1 = br.readLine()) != null) {
                 String[] columns = line1.split(",");
-                double x = Double.parseDouble(columns[0]);
-                double y = Double.parseDouble(columns[1]);
-                double z = Double.parseDouble(columns[2]);
-
-                double[] converted = RDtoGPS.Convert(x, y);
-
-                point.setX(converted[0]);
-                point.setY(converted[1]);
-                point.setZ(z);
-
-                points.add(point);
+                PVector vector = new PVector();
+                vector.add(Float.parseFloat(columns[0]), Float.parseFloat(columns[1]), Float.parseFloat(columns[2]));
+                points.add(vector);
             }
 
             System.out.println("Done placing items in ArrayLists");
@@ -69,10 +53,47 @@ public class DEV018x3A extends PApplet {
         }
     }
 
-    public static double[] convert(double x, double y) {
-        double[] c = RDtoGPS.Convert(x, y);
+    //Find maximum (largest) value in array using loop
+    public static float getMaxX(ArrayList<PVector> numbers) {
+        float maxValue = numbers.get(0).x;
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).x > maxValue) {
+                maxValue = numbers.get(i).x;
+            }
+        }
+        return maxValue;
+    }
 
-        return c;
+    public static float getMaxY(ArrayList<PVector> numbers) {
+        float maxValue = numbers.get(0).y;
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).y > maxValue) {
+                maxValue = numbers.get(i).y;
+            }
+        }
+        return maxValue;
+    }
+
+    //Find minimum (lowest) value in array using loop
+    public static float getMinX(ArrayList<PVector> numbers) {
+        float minValue = numbers.get(0).x;
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).x < minValue) {
+                minValue = numbers.get(i).x;
+            }
+        }
+        return minValue;
+    }
+
+    //Find minimum (lowest) value in array using loop
+    public static float getMinY(ArrayList<PVector> numbers) {
+        float minValue = numbers.get(0).y;
+        for (int i = 1; i < numbers.size(); i++) {
+            if (numbers.get(i).y < minValue) {
+                minValue = numbers.get(i).y;
+            }
+        }
+        return minValue;
     }
 
     /**
@@ -80,64 +101,51 @@ public class DEV018x3A extends PApplet {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        PApplet.main(new String[]{DEV018x3A.class.getName()});
         ReadText();
+        minX = getMinX(points);
+        maxX = getMaxX(points);
+        minY = getMinY(points);
+        maxY = getMaxY(points);
+
+        System.out.println("Min X: " + minX);
+        System.out.println("Max X: " + maxX);
+        System.out.println("Min Y: " + minY);
+        System.out.println("Max Y: " + maxY);
+
+        PApplet.main(new String[]{DEV018x3A.class.getName()});
     }
 
-    
+    public void goMap(float vectX, float vectY) {
+        try {
+
+            float pointX = map(vectX, minX, maxX, 0, 600);
+            float pointY = map(vectY, maxY, minY, 800, 0);
+
+            //Create point on map with x and y
+            fill(0, 0, 0);
+            ellipse(pointX, pointY, 4, 4);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void settings() {
-        size(800, 600, Java2DMapDisplay.FX2D);
+        size(800, 600);
         smooth(4);
-
-        currentMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
-        MapUtils.createDefaultEventDispatcher(this, currentMap);
-        currentMap.zoomAndPanTo(new Location(51.917822, 4.480970), 10);
     }
 
     @Override
     public void setup() {
         //Set Title
         surface.setTitle("Overstroming");
-
-        for (int i = 0; i < 5000; i++) {
-            Location loc = new Location(points.get(i).getX(), points.get(i).getY());
-            SimplePointMarker markers = new SimplePointMarker(loc);
-            markers.setColor(color(255, 0, 0));
-            currentMap.addMarker(markers);
-        }
-
     }
 
     @Override
     public void draw() {
-        currentMap.draw();
-
-    }
-    
-    @Override
-    public void keyPressed() {
-        if (currentMap != null) {
-            if (key == '+') {
-                currentMap.zoomLevelIn();
-            }
-            if (key == '-') {
-                currentMap.zoomLevelOut();
-            }
-            if (key == 's') {
-                this.redraw();
-            }
+        for (int i = 0; i < points.size(); i++) {
+            goMap(points.get(i).x, points.get(i).y);
         }
     }
-
-    @Override
-    public void mouseWheel(MouseEvent event) {
-        float e = event.getCount();
-        if (e > 0) {
-            currentMap.zoomLevelIn();
-        } else {
-            currentMap.zoomLevelOut();
-        }
-    }
-
 }

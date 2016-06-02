@@ -30,12 +30,13 @@ public class parseCSV {
         try {
             logger.info("Reading CSV...");
 
-            //read csv
+            //read csv using opencsv library
             CSVReader reader = new CSVReader(new FileReader("C:\\dev\\oost.csv"), ',', '\'', 1);
             String[] nextLine;
 
             logger.info("Going through CSV...");
 
+            //start time to see how long it takes
             long startTime = System.currentTimeMillis();
 
             while ((nextLine = reader.readNext()) != null) {
@@ -45,10 +46,12 @@ public class parseCSV {
 
                 PVector tempVector = new PVector(Float.parseFloat(nextLine[0]), Float.parseFloat(nextLine[1]), z);
 
+                //Limit of Map
                 float limitX = (startX - tempVector.x);
                 float limitY = (startY - tempVector.y);
 
-                if (limitX < 1000 && limitY < 1000) {
+                //if x and y are equal or lower add to arraylist
+                if (limitX <= 1000 && limitY <= 1000) {
                     points.add(tempVector);
                 }
                 if (minZ > z) {
@@ -59,6 +62,10 @@ public class parseCSV {
                 }
 
             }
+            
+            reader.close();
+            
+            //stop timer
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
 

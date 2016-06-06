@@ -10,6 +10,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
 import static processing.core.PApplet.map;
+import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 /**
@@ -18,8 +20,8 @@ import processing.core.PVector;
  */
 public class Main extends PApplet {
 
-    private static ArrayList<PVector> results = new ArrayList();
-    private static ArrayList<PVector> mappings = new ArrayList();
+    private ArrayList<PVector> results = new ArrayList();
+    private final ArrayList<PVector> mappings = new ArrayList();
 
     private final float startX = 92799f;
     private final float startY = 436964f;
@@ -36,11 +38,12 @@ public class Main extends PApplet {
         frameRate(1);
         surface.setTitle("Hoogtebestand Rotterdam Oost");
         results = parseCSV.read();  //Get all items from parseCSV
+        startMap();
     }
 
     @Override
     public void settings() {
-        size(680, 680, JAVA2D);
+        size(680, 680);
 
     }
 
@@ -50,16 +53,19 @@ public class Main extends PApplet {
     }
 
     //Method to map xyz coordinates
-    private void startMap(float x, float y, float z) {
+    private void startMap() {
         float minZ = parseCSV.minZ;     //min value of Z ~ -16
         float maxZ = parseCSV.maxZ;     //max value of z ~ 215
 
-        float mapX = map(x, minX, maxX, 0, width);   //map x
-        float mapY = map(y, maxY, minY, 0, height);  //map y
-        float mapZ = map(z, minZ, maxZ, 0, 216);     //map z
+        for (int i = 0; i < results.size(); i++) {
+            float mapX = map(results.get(i).x, minX, maxX, 0, width);   //map x
+            float mapY = map(results.get(i).y, maxY, minY, 0, height);  //map y
+            float mapZ = map(results.get(i).z, minZ, maxZ, 0, 216);     //map z
 
-        PVector mappedVector = new PVector(mapX, mapY, mapZ);
-        mappings.add(mappedVector);
+            PVector mappedVector = new PVector(mapX, mapY, mapZ);
+            mappings.add(mappedVector);
+        }
+        
     }
 
     private void createMap(float mapX, float mapY, float mapZ) {
@@ -85,10 +91,10 @@ public class Main extends PApplet {
 
     }
 
-    //Method to create ellipses from startMap
+    //Method to create ellipses from startMap and createMap
     private void createPoints() {
-        for (int i = 0; i < results.size(); i++) {
-            createMap(results.get(i).x, results.get(i).y, results.get(i).z);
+        for (int i = 0; i < mappings.size(); i++) {
+            createMap(mappings.get(i).x, mappings.get(i).y, mappings.get(i).z);
         }
     }
 
@@ -96,6 +102,6 @@ public class Main extends PApplet {
     public void draw() {
         //Draw all points
         createPoints();
-        waterline = waterline + 1.00f;
+        waterline = waterline + 0.25f;
     }
 }

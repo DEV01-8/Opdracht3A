@@ -26,7 +26,7 @@ public class Main extends PApplet {
     private final float minY = startY - 1000f;
     private final float maxY = startY + 1000f;
     final static Logger logger = Logger.getLogger(Main.class);
-    float waterline = 80f;
+    float waterline = -16f;
 
     @Override
     public void setup() {
@@ -97,7 +97,8 @@ public class Main extends PApplet {
     
     @Override
     public void mouseClicked(){
-        waterline = waterline + 0.30f;
-        redraw();
+        waterline = waterline + 5f;
+        //redraw();
+        createPoints();
     }
 }

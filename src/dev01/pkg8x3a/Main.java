@@ -5,13 +5,7 @@
  */
 package dev01.pkg8x3a;
 
-import g4p_controls.G4P;
-import g4p_controls.GButton;
-import g4p_controls.GCScheme;
-import g4p_controls.GEvent;
-import g4p_controls.GLabel;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
@@ -25,44 +19,32 @@ import processing.core.PVector;
 public class Main extends PApplet {
 
     public static ArrayList<PVector> results = new ArrayList();
-    private static final float startX = 92799f;
-    private static final float startY = 436964f;
-    private static final float minX = startX - 1000f;
-    private static final float maxX = startX + 1000f;
-    private static final float minY = startY - 1000f;
-    private static final float maxY = startY + 1000f;
+    private final float startX = 92799f;
+    private final float startY = 436964f;
+    private final float minX = startX - 1000f;
+    private final float maxX = startX + 1000f;
+    private final float minY = startY - 1000f;
+    private final float maxY = startY + 1000f;
     final static Logger logger = Logger.getLogger(Main.class);
-    boolean paused = false;
-    GButton startButton;
-    GButton stopButton;
-    
+    float waterline = 80f;
+
     @Override
     public void setup() {
         background(255);
-        surface.setTitle("Waterhoogte Rotterdam Oost");
+        surface.setTitle("Hoogtebestand Rotterdam Oost");
 
-        G4P.setGlobalColorScheme(GCScheme.GREEN_SCHEME);
-
-        startButton = new GButton(this, 30, 30, 200, 30, "Start");
-        stopButton = new GButton(this, 250, 30, 200, 30, "Stop");
-        startButton.addEventHandler(this, "handleStartButtonEvents");
-        stopButton.addEventHandler(this, "handleStopButtonEvents");
+        results = parseCSV.read();  //Get all items from parseCSV
     }
 
     @Override
     public void settings() {
-        size(1000, 680);
+        size(680, 680);
 
     }
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
-        try {
-            PApplet.main(new String[]{Main.class.getName()});
-            results = parseCSV.read();  //Get all items from parseCSV
-        } catch (Exception e) {
-            logger.info(e);
-        }
+        PApplet.main(new String[]{Main.class.getName()});
     }
 
     //Method to map xyz coordinates
@@ -74,12 +56,6 @@ public class Main extends PApplet {
             float mapX = map(x, minX, maxX, 0, width);   //map x
             float mapY = map(y, maxY, minY, 0, height);  //map y
             float mapZ = map(z, minZ, maxZ, 0, 216);     //map z
-
-            //water
-            if (mapZ > -16f && mapZ < 4.6f) {
-                stroke(color(mapZ, mapZ, mapZ));
-                fill(color(mapZ, mapZ, mapZ));
-            }
 
             //ground
             if (mapZ > 4.6f && mapZ < 23f) {
@@ -93,7 +69,14 @@ public class Main extends PApplet {
                 fill(color(mapZ, mapZ, mapZ));
             }
 
+            //water
+            if (waterline > mapZ) {
+                stroke(color(0, 0, 255));
+                fill(color(0, 0, 255));
+            }
+
             rect(mapX, mapY, 13f, 13f);            //create ellipse at points of mapped xy
+
         } catch (Exception e) {
             logger.info(e);
         }
@@ -109,34 +92,12 @@ public class Main extends PApplet {
     @Override
     public void draw() {
         //Draw all points
-        if (!paused) {
-            createPoints();
-        }
-        
-        startButton.draw();
-        stopButton.draw();
+        createPoints();
     }
-
-    public void handleStartButtonEvents(GButton button, GEvent event) {
-        // If we have more than one button then this is how we
-        // check which one was cllicked.
-        if (button == startButton && event == GEvent.CLICKED) {
-            paused = false;
-            JOptionPane.showMessageDialog(null, "Resuming Program....", "Resumed", JOptionPane.INFORMATION_MESSAGE);
-            this.resume();
-            logger.info("Resuming....");
-        }
+    
+    @Override
+    public void mouseClicked(){
+        waterline = waterline + 0.30f;
+        redraw();
     }
-
-    public void handleStopButtonEvents(GButton button, GEvent event) {
-        // If we have more than one button then this is how we
-        // check which one was cllicked.
-        if (button == stopButton && event == GEvent.CLICKED) {
-            paused = true;
-            JOptionPane.showMessageDialog(null, "Pausing Program....", "Paused", JOptionPane.INFORMATION_MESSAGE);
-            this.pause();
-            logger.info("Paused....");
-        }
-    }
-
 }

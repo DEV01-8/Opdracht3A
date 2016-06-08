@@ -19,14 +19,6 @@ import processing.core.PVector;
 public class Main extends PApplet {
 
     private ArrayList<PVector> results = new ArrayList();
-    private final ArrayList<PVector> mappings = new ArrayList();
-
-    private final float START_X = 92799f;
-    private final float START_Y = 436964f;
-    private final float MIN_X = START_X - 1000f;
-    private final float MAX_X = START_X + 1000f;
-    private final float MIN_Y = START_Y - 1000f;
-    private final float MAX_Y = START_Y + 1000f;
     final Logger logger = Logger.getLogger(Main.class);
 
     @Override
@@ -48,20 +40,14 @@ public class Main extends PApplet {
         PApplet.main(new String[]{Main.class.getName()});
     }
 
-    //Method to map xyz coordinates
-    private void startMap() {
-        float MIN_Z = CSVParser.MIN_Z;     //min value of Z ~ -16
-        float MAX_Z = CSVParser.MAX_Z;     //max value of z ~ 215
-
-        for (PVector result : results) {
-            float mapX = map(result.x, MIN_X, MAX_X, 0, width);         //map x
-            float mapY = map(result.y, MAX_Y, MIN_Y, 0, height);        //map y
-            float mapZ = map(result.z, MIN_Z, MAX_Z, 0, 216);           //map z
-            PVector mappedVector = new PVector(mapX, mapY, mapZ);       //PVector holding all mapped values
-            mappings.add(mappedVector);                                 //ArrayList of PVectors holding mapped values
+    private void printAll(){
+        for(PVector vector: results){
+            logger.info("Size results: " + results.size());
+            logger.info("X: " + vector.x);
+            logger.info("Y: " + vector.y);
+            logger.info("Z: " + vector.z);
         }
     }
-
     
     @Override
     public void draw() {

@@ -26,7 +26,6 @@ public class ParseCSV {
     private static final float START_Y = 436964f;
     final static Logger logger = Logger.getLogger(ParseCSV.class);
 
-
     public static ArrayList<PVector> read() {
         try {
             logger.info("Reading CSV...");
@@ -34,7 +33,7 @@ public class ParseCSV {
             File path = new File("C:\\dev\\oost.csv");
             char[] separator = {',', '\''};
             int skipLine = 1;
-            
+
             //read csv using opencsv library
             CSVReader reader = new CSVReader(new FileReader(path), separator[0], separator[1], skipLine);
             String[] nextLine;
@@ -64,9 +63,9 @@ public class ParseCSV {
                     MAX_Z = z;
                 }
             }
-            
+
             reader.close();
-            
+
             //stop timer
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;

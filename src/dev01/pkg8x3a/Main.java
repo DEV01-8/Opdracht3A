@@ -5,6 +5,7 @@
  */
 package dev01.pkg8x3a;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import org.apache.log4j.BasicConfigurator;
@@ -29,14 +30,16 @@ public class Main extends PApplet {
     private final float MIN_Y = START_Y - 1000f;
     private final float MAX_Y = START_Y + 1000f;
     float waterLevel = -5f;
-    float raiseWater = 0.11f;
+    float raiseWater = 0.100f;
+    int frames = 8;
     final Logger logger = Logger.getLogger(Main.class);
     boolean firstRun = true;
     boolean pause = false;
 
     @Override
     public void setup() {
-        background(255);
+        background(255, 255, 255);
+        textSize(13);
         frameRate(1);
         surface.setTitle("Hoogtebestand Rotterdam Oost");
 
@@ -44,7 +47,15 @@ public class Main extends PApplet {
         startMap();                 //use map() method to convert RDX and RDY to pixels
 
         //Show message about controls
-        JOptionPane.showMessageDialog(frame, "Controls: \n SPACE: Resume \n P: Pause \n R: Reset \n S:Stop");
+        JOptionPane.showMessageDialog(frame, "Controls:\n"
+                + "S: Resume \n"
+                + "P: Pause \n"
+                + "R: Reset \n"
+                + "Q: Quit \n"
+                + "1: Slow speed \n"
+                + "2: Medium speed \n"
+                + "3: High speed"
+        );
     }
 
     @Override
@@ -53,7 +64,8 @@ public class Main extends PApplet {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();                      //Logger4J
+        //Logger4J
+        BasicConfigurator.configure();
         PApplet.main(new String[]{Main.class.getName()});
     }
 
@@ -78,7 +90,7 @@ public class Main extends PApplet {
                 float mapY = mapping.y;
                 float mapZ = mapping.z;
 
-                if (mapZ > 5.5f && mapZ < 22.5f) {      //Color of ground and roads
+                if (mapZ > 4.0f && mapZ < 21.5f) {      //Color of ground and roads
                     stroke(color(196, 193, 186));
                     fill(color(211, 208, 201));
                 } else {                                //Color of top of building
@@ -109,37 +121,98 @@ public class Main extends PApplet {
         }
     }
 
+    private void reset() {
+        logger.info("Resetting...");
+        firstRun = true;
+        background(255, 255, 255);
+        setup();
+    }
+
+    private void quit() {
+        logger.info("Quitting...");
+        System.exit(0);
+    }
+
     @Override
     public void draw() {
+        //Use DecimalFormat to only show two digits
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
         //Draw all points
         createMap();
 
-        //Increase water level by 0.11
-        waterLevel = waterLevel + raiseWater;
+        //Increase waterlevel every six frames and display value
+        if (pause == false && frameCount % frames == 0) {
+            fill(255, 255, 255);
+            rect(0, 0, 168, 35);
+
+            //Increase water level by 0.11
+            waterLevel = waterLevel + raiseWater;
+
+            //Show value waterLevel
+            fill(0, 0, 0);
+            text("Water Level (m): " + df.format(waterLevel), 32, 16);
+        }
+
+        //Show circle green if running and red if paused
+        if (pause == false) {
+            fill(0, 200, 0);
+            ellipse(12, 11, 18, 18);
+        } else {
+            fill(200, 0, 0);
+            ellipse(12, 11, 18, 18);
+        }
+
+        //Show current speed
+        fill(0, 0, 0);
+        switch (frames) {
+            case 8:
+                text("Speed: Slow", 32, 30);
+                break;
+            case 4:
+                text("Speed: Medium", 32, 30);
+                break;
+            case 2:
+                text("Speed: High", 32, 30);
+                break;
+            default:
+                text("Speed: Slow", 32, 30);
+                break;
+        }
     }
 
     @Override
     public void keyPressed() {
         switch (key) {
-            case ' ':
+            case 's':                       //Start, Resume
                 pause = false;
                 raiseWater = 0.11f;
                 logger.info("Resuming...");
                 break;
-            case 'p':
+            case 'p':                       //Pause
                 pause = true;
                 raiseWater = 0.0f;
                 logger.info("Paused...");
                 break;
-            case 'r':
-                logger.info("Resetting...");
-                draw();
+            case 'r':                       //Reset
+                reset();
                 break;
-            case 's':
-                logger.info("Stopping...");
-                System.exit(0);
+            case 'q':                       //Quit
+                quit();
+                break;
+            case '1':                       //Speed 1: update every 6 frames
+                frames = 8;
+                break;
+            case '2':                       //Speed 2: update every 4 frames
+                frames = 4;
+                break;
+            case '3':                       //Speed 3: update every 2 frames
+                frames = 2;
                 break;
             default:
+                frames = 6;
+                pause = false;
                 break;
         }
     }

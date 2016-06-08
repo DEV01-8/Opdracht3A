@@ -6,6 +6,7 @@
 package dev01.pkg8x3a;
 
 import com.opencsv.CSVReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,8 +31,12 @@ public class parseCSV {
         try {
             logger.info("Reading CSV...");
 
+            File path = new File("C:\\dev\\oost.csv");
+            char[] separator = {',', '\''};
+            int skipLine = 1;
+            
             //read csv using opencsv library
-            CSVReader reader = new CSVReader(new FileReader("C:\\dev\\oost.csv"), ',', '\'', 1);
+            CSVReader reader = new CSVReader(new FileReader(path), separator[0], separator[1], skipLine);
             String[] nextLine;
 
             logger.info("Going through CSV...");
@@ -41,9 +46,7 @@ public class parseCSV {
 
             while ((nextLine = reader.readNext()) != null) {
                 // nextLine[] is an array of values from the line
-
                 float z = Float.parseFloat(nextLine[2]);
-
                 PVector tempVector = new PVector(Float.parseFloat(nextLine[0]), Float.parseFloat(nextLine[1]), z);
 
                 //Limit of Map
@@ -60,7 +63,6 @@ public class parseCSV {
                 if (maxZ < z) {
                     maxZ = z;
                 }
-
             }
             
             reader.close();

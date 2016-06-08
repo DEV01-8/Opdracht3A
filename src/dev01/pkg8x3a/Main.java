@@ -5,8 +5,6 @@
  */
 package dev01.pkg8x3a;
 
-import g4p_controls.GButton;
-import g4p_controls.GEvent;
 import java.util.ArrayList;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -29,13 +27,9 @@ public class Main extends PApplet {
     private final float maxX = startX + 1000f;
     private final float minY = startY - 1000f;
     private final float maxY = startY + 1000f;
-
+    float waterLevel = -5f;
     final Logger logger = Logger.getLogger(Main.class);
-    float waterline = -16f;
-    boolean first;
-    boolean loop = true;
-    GButton startButton;
-    GButton stopButton;
+    boolean firstRun = true;
 
     @Override
     public void setup() {
@@ -44,24 +38,16 @@ public class Main extends PApplet {
         surface.setTitle("Hoogtebestand Rotterdam Oost");
 
         results = parseCSV.read();  //Get all items from parseCSV
-        startMap();
-
-        startButton = new GButton(this, 30, 30, 200, 40, "Start");
-        stopButton = new GButton(this, 250, 30, 200, 40, "Stop");
-
-        startButton.addEventHandler(this, "handleStartButtonEvent");
-        stopButton.addEventHandler(this, "handleStopButtonEvent");
-
+        startMap();                 //use map() method to convert RDX and RDY to pixels
     }
 
     @Override
     public void settings() {
         size(680, 680);
-
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        BasicConfigurator.configure();                      //Logger4J
         PApplet.main(new String[]{Main.class.getName()});
     }
 
@@ -69,78 +55,63 @@ public class Main extends PApplet {
     private void startMap() {
         float minZ = parseCSV.minZ;     //min value of Z ~ -16
         float maxZ = parseCSV.maxZ;     //max value of z ~ 215
-        
-        for (int i = 0; i < results.size(); i++) {
-            float mapX = map(results.get(i).x, minX, maxX, 0, width);   //map x
-            float mapY = map(results.get(i).y, maxY, minY, 0, height);  //map y
-            float mapZ = map(results.get(i).z, minZ, maxZ, 0, 216);     //map z
 
-            PVector mappedVector = new PVector(mapX, mapY, mapZ);
-            mappings.add(mappedVector);
+        for (PVector result : results) {
+            float mapX = map(result.x, minX, maxX, 0, width);       //map x
+            float mapY = map(result.y, maxY, minY, 0, height);      //map y
+            float mapZ = map(result.z, minZ, maxZ, 0, 216);         //map z
+            PVector mappedVector = new PVector(mapX, mapY, mapZ);   //PVector holding all mapped values
+            mappings.add(mappedVector);                             //ArrayList of PVectors holding mapped values
         }
-
     }
 
-    private void createMap(float mapX, float mapY, float mapZ) {
-        //ground
-        if (mapZ > 4.6f && mapZ < 23f) {
-            stroke(color(mapZ, mapZ, mapZ));
-            fill(color(mapZ, mapZ, mapZ));
-        }
+    private void createMap() {
+        if (firstRun == true) {
+            for (PVector mapping : mappings) {
+                float mapX = mapping.x;
+                float mapY = mapping.y;
+                float mapZ = mapping.z;
 
-        //top of buildings
-        if (mapZ > 23f && mapZ < 215f) {
-            stroke(color(mapZ, mapZ, mapZ));
-            fill(color(mapZ, mapZ, mapZ));
-        }
+                if (mapZ > 5.5f && mapZ < 22.5f) {      //Color of ground and roads
+                    stroke(color(196, 193, 186));
+                    fill(color(211, 208, 201));
+                } else {                                //Color of top of building
+                    stroke(color(247, 245, 239));
+                    fill(color(242, 240, 234));
+                }
 
-        if (mapZ > 4.6f && mapZ < 23f) {
-            stroke(color(mapZ, mapZ, mapZ));
-            fill(color(mapZ, mapZ, mapZ));
-        }
+                rect(mapX, mapY, 13f, 13f);            //create rect at points of mapped xy
+            }
 
-        //top of buildings
-        if (mapZ > 23f && mapZ < 215f) {
-            stroke(color(mapZ, mapZ, mapZ));
-            fill(color(mapZ, mapZ, mapZ));
-        }
+            firstRun = false;                       //Set firstRun to false to create water
 
-        //water
-        if (waterline > mapZ) {
-            stroke(color(0, 0, 255));
-            fill(color(0, 0, 255));
-        }
+        } else if (firstRun == false) {
+            for (PVector mapping : mappings) {
+                float mapX = mapping.x;
+                float mapY = mapping.y;
+                float mapZ = mapping.z;
 
-        rect(mapX, mapY, 13f, 13f);            //create ellipse at points of mapped xy
+                if (waterLevel > mapZ) {                     //Color of water
+                    stroke(color(0, 153, 153));
+                    fill(color(0, 153, 153));
 
-    }
-
-    //Method to create ellipses from startMap and createMap
-    private void createPoints() {
-        for (int i = 0; i < mappings.size(); i++) {
-            createMap(mappings.get(i).x, mappings.get(i).y, mappings.get(i).z);
+                    ellipse(mapX, mapY, 2f, 2f);            //create ellipse at points of mapped x
+                }
+            }
         }
     }
 
     @Override
     public void draw() {
         //Draw all points
-        createPoints();
-        waterline = waterline + 0.25f;
+        createMap();
 
-        startButton.draw();
-        stopButton.draw();
+        //Increase water level by 0.11
+        waterLevel = waterLevel + 0.11f;
     }
 
-    public void handleStartButtonEvent(GButton button, GEvent event) {
-        if (button == startButton && event == GEvent.CLICKED) {
-            logger.info("StartButton is pressed!");
-        }
-    }
-
-    public void handleStopButtonEvent(GButton button, GEvent event) {
-        if (button == stopButton && event == GEvent.CLICKED) {
-            logger.info("StopButton is pressed!");
-        }
+    @Override
+    public void mouseClicked() {
+        logger.info("Water Level: " + waterLevel);
     }
 }

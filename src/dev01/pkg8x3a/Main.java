@@ -43,7 +43,7 @@ public class Main extends PApplet {
         frameRate(1);
         surface.setTitle("Hoogtebestand Rotterdam Oost");
 
-        results = ParseCSV.read();  //Get all items from parseCSV
+        results = CSVParser.read();  //Get all items from parseCSV
         startMap();                 //use map() method to convert RDX and RDY to pixels
 
         //Show message about controls
@@ -71,8 +71,8 @@ public class Main extends PApplet {
 
     //Method to map xyz coordinates
     private void startMap() {
-        float MIN_Z = ParseCSV.MIN_Z;     //min value of Z ~ -16
-        float MAX_Z = ParseCSV.MAX_Z;     //max value of z ~ 215
+        float MIN_Z = CSVParser.MIN_Z;     //min value of Z ~ -16
+        float MAX_Z = CSVParser.MAX_Z;     //max value of z ~ 215
 
         for (PVector result : results) {
             float mapX = map(result.x, MIN_X, MAX_X, 0, width);         //map x

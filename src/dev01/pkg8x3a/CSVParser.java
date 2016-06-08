@@ -15,16 +15,16 @@ import processing.core.PVector;
 
 /**
  *
- * @author Johan Bos
+ * @author Johan Bos <Johan Bos at jhnbos.nl>
  */
-public class ParseCSV {
+public class CSVParser {
 
     private static final ArrayList<PVector> points = new ArrayList();
     public static float MAX_Z = Float.MIN_VALUE;
     public static float MIN_Z = Float.MAX_VALUE;
     private static final float START_X = 92799f;
     private static final float START_Y = 436964f;
-    final static Logger logger = Logger.getLogger(ParseCSV.class);
+    final static Logger logger = Logger.getLogger(CSVParser.class);
 
     public static ArrayList<PVector> read() {
         try {

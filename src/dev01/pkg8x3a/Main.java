@@ -6,6 +6,7 @@
 package dev01.pkg8x3a;
 
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
@@ -21,15 +22,17 @@ public class Main extends PApplet {
     private ArrayList<PVector> results = new ArrayList();
     private final ArrayList<PVector> mappings = new ArrayList();
 
-    private final float startX = 92799f;
-    private final float startY = 436964f;
-    private final float minX = startX - 1000f;
-    private final float maxX = startX + 1000f;
-    private final float minY = startY - 1000f;
-    private final float maxY = startY + 1000f;
+    private final float START_X = 92799f;
+    private final float START_Y = 436964f;
+    private final float MIN_X = START_X - 1000f;
+    private final float MAX_X = START_X + 1000f;
+    private final float MIN_Y = START_Y - 1000f;
+    private final float MAX_Y = START_Y + 1000f;
     float waterLevel = -5f;
+    float raiseWater = 0.11f;
     final Logger logger = Logger.getLogger(Main.class);
     boolean firstRun = true;
+    boolean pause = false;
 
     @Override
     public void setup() {
@@ -37,8 +40,11 @@ public class Main extends PApplet {
         frameRate(1);
         surface.setTitle("Hoogtebestand Rotterdam Oost");
 
-        results = parseCSV.read();  //Get all items from parseCSV
+        results = ParseCSV.read();  //Get all items from parseCSV
         startMap();                 //use map() method to convert RDX and RDY to pixels
+
+        //Show message about controls
+        JOptionPane.showMessageDialog(frame, "Controls: \n SPACE: Resume \n P: Pause \n R: Reset \n S:Stop");
     }
 
     @Override
@@ -53,15 +59,15 @@ public class Main extends PApplet {
 
     //Method to map xyz coordinates
     private void startMap() {
-        float minZ = parseCSV.minZ;     //min value of Z ~ -16
-        float maxZ = parseCSV.maxZ;     //max value of z ~ 215
+        float MIN_Z = ParseCSV.MIN_Z;     //min value of Z ~ -16
+        float MAX_Z = ParseCSV.MAX_Z;     //max value of z ~ 215
 
         for (PVector result : results) {
-            float mapX = map(result.x, minX, maxX, 0, width);       //map x
-            float mapY = map(result.y, maxY, minY, 0, height);      //map y
-            float mapZ = map(result.z, minZ, maxZ, 0, 216);         //map z
-            PVector mappedVector = new PVector(mapX, mapY, mapZ);   //PVector holding all mapped values
-            mappings.add(mappedVector);                             //ArrayList of PVectors holding mapped values
+            float mapX = map(result.x, MIN_X, MAX_X, 0, width);         //map x
+            float mapY = map(result.y, MAX_Y, MIN_Y, 0, height);        //map y
+            float mapZ = map(result.z, MIN_Z, MAX_Z, 0, 216);           //map z
+            PVector mappedVector = new PVector(mapX, mapY, mapZ);       //PVector holding all mapped values
+            mappings.add(mappedVector);                                 //ArrayList of PVectors holding mapped values
         }
     }
 
@@ -86,16 +92,18 @@ public class Main extends PApplet {
             firstRun = false;                       //Set firstRun to false to create water
 
         } else if (firstRun == false) {
-            for (PVector mapping : mappings) {
-                float mapX = mapping.x;
-                float mapY = mapping.y;
-                float mapZ = mapping.z;
+            if (pause == false) {
+                for (PVector mapping : mappings) {
+                    float mapX = mapping.x;
+                    float mapY = mapping.y;
+                    float mapZ = mapping.z;
 
-                if (waterLevel > mapZ) {                     //Color of water
-                    stroke(color(0, 153, 153));
-                    fill(color(0, 153, 153));
+                    if (waterLevel > mapZ) {                     //Color of water
+                        stroke(color(0, 153, 153));
+                        fill(color(0, 153, 153));
 
-                    ellipse(mapX, mapY, 2f, 2f);            //create ellipse at points of mapped x
+                        ellipse(mapX, mapY, 2f, 2f);            //create ellipse at points of mapped x
+                    }
                 }
             }
         }
@@ -107,11 +115,32 @@ public class Main extends PApplet {
         createMap();
 
         //Increase water level by 0.11
-        waterLevel = waterLevel + 0.11f;
+        waterLevel = waterLevel + raiseWater;
     }
 
     @Override
-    public void mouseClicked() {
-        logger.info("Water Level: " + waterLevel);
+    public void keyPressed() {
+        switch (key) {
+            case ' ':
+                pause = false;
+                raiseWater = 0.11f;
+                logger.info("Resuming...");
+                break;
+            case 'p':
+                pause = true;
+                raiseWater = 0.0f;
+                logger.info("Paused...");
+                break;
+            case 'r':
+                logger.info("Resetting...");
+                draw();
+                break;
+            case 's':
+                logger.info("Stopping...");
+                System.exit(0);
+                break;
+            default:
+                break;
+        }
     }
 }

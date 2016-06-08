@@ -17,14 +17,14 @@ import processing.core.PVector;
  *
  * @author Johan Bos
  */
-public class parseCSV {
+public class ParseCSV {
 
     private static final ArrayList<PVector> points = new ArrayList();
-    public static float maxZ = Float.MIN_VALUE;
-    public static float minZ = Float.MAX_VALUE;
-    private static final float startX = 92799f;
-    private static final float startY = 436964f;
-    final static Logger logger = Logger.getLogger(parseCSV.class);
+    public static float MAX_Z = Float.MIN_VALUE;
+    public static float MIN_Z = Float.MAX_VALUE;
+    private static final float START_X = 92799f;
+    private static final float START_Y = 436964f;
+    final static Logger logger = Logger.getLogger(ParseCSV.class);
 
 
     public static ArrayList<PVector> read() {
@@ -50,18 +50,18 @@ public class parseCSV {
                 PVector tempVector = new PVector(Float.parseFloat(nextLine[0]), Float.parseFloat(nextLine[1]), z);
 
                 //Limit of Map
-                float limitX = (startX - tempVector.x);
-                float limitY = (startY - tempVector.y);
+                float limitX = (START_X - tempVector.x);
+                float limitY = (START_Y - tempVector.y);
 
                 //if x and y are equal or lower add to arraylist
                 if (limitX <= 1000 && limitY <= 1000) {
                     points.add(tempVector);
                 }
-                if (minZ > z) {
-                    minZ = z;
+                if (MIN_Z > z) {
+                    MIN_Z = z;
                 }
-                if (maxZ < z) {
-                    maxZ = z;
+                if (MAX_Z < z) {
+                    MAX_Z = z;
                 }
             }
             
